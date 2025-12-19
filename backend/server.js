@@ -13,7 +13,17 @@ app.use(cors());
 app.use(express.json());
 
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(async () => {
+    console.log('Connected to MongoDB');
+    
+    // Auto-seed if no users exist
+    const User = require('./models/User');
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log('No users found, running seed...');
+      require('./seed');
+    }
+  })
   .catch(err => {
     console.error('MongoDB connection error:', err.message);
     console.log('Server will continue running without database connection');

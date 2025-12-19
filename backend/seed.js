@@ -5,11 +5,6 @@ require('dotenv').config();
 
 async function seedDatabase() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    
-    await User.deleteMany({});
-    await Room.deleteMany({});
-    
     const admin = new User({
       name: 'Admin User',
       email: 'admin@college.edu',
@@ -36,11 +31,21 @@ async function seedDatabase() {
     await Room.insertMany(rooms);
     
     console.log('Database seeded successfully');
-    process.exit(0);
   } catch (error) {
     console.error('Seeding error:', error);
-    process.exit(1);
   }
 }
 
-seedDatabase();
+if (require.main === module) {
+  // Run directly
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => seedDatabase())
+    .then(() => process.exit(0))
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+} else {
+  // Run as module
+  seedDatabase();
+}
